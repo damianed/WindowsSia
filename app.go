@@ -32,6 +32,15 @@ func (a *App) startup(ctx context.Context) {
   }
 }
 
+func (a *App) HasSavedKey() bool {
+  cfg, _ := a.configStore.Config()
+  if cfg.ApiKey == "" {
+    return false
+  }
+
+  return true
+ }
+
 func (a *App) SaveOpenAIKey(key string) string {
   cfg, _ := a.configStore.Config()
   requestURL := fmt.Sprintf("https://api.openai.com/v1/chat/completions")

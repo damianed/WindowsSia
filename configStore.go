@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -12,7 +11,7 @@ import (
 )
 
 type Config struct {
-  ApiKey string `json:apiKey`
+  ApiKey string `json:"apiKey"`
 }
 
 func DefaultConfig() Config {
@@ -26,6 +25,7 @@ type ConfigStore struct {
 }
 
 func NewConfigStore() (*ConfigStore, error) {
+  //TODO: update path
   configFilePath, err := xdg.ConfigFile("gptdesktop/config.json")
   if err != nil {
     return nil, fmt.Errorf("could not resolve path for config file: %w", err)
@@ -73,7 +73,6 @@ func (s *ConfigStore) SaveConfig(cfg Config) error {
 
   err = os.WriteFile(s.configPath, bytes, 0644)
 
-  log.Println(s.configPath)
   if err != nil {
     return fmt.Errorf("could not write the configuration file: %w", err)
   }

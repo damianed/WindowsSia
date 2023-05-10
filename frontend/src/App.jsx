@@ -1,45 +1,31 @@
 import {useEffect, useState} from 'react';
 //import logo from './assets/images/logo-universal.png';
 import './App.css';
-import {SaveOpenAIKey} from "../wailsjs/go/main/App";
+import {HasSavedKey} from "../wailsjs/go/main/App";
+import ApiKeyForm from './components/ApiKeyForm';
+import Chat from './components/Chat';
 
 function App() {
-    const [resultText, setResultText] = useState("Please enter your api key below");
-    const [apiKey, setApiKey] = useState('');
-    const [error, setError] = useState('');
-    const updateKey = (e) => setApiKey(e.target.value);
-    const updateResultText = (result) => setResultText(result);
+  const updateResultText = (result) => setResultText(result);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
-    useEffect(() => {
-      setError('')
-    }, [apiKey]);
 
-    function saveKey() {
-      console.log('apikey', apiKey)
-      if (apiKey != '') {
-        SaveOpenAIKey(apiKey).then(setError);
+  useEffect(() => {
+    HasSavedKey().then((res) => {
+      console.log(res)
+      setHasApiKey(res)
+    })
+  }, [])
+
+
+  return (
+    <div id="App">
+      { !hasApiKey
+        ? <ApiKeyForm setHasApiKey={setHasApiKey}/>
+        : <Chat />
       }
-    }
-
-    return (
-        <div id="App">
-        {/* <img src={logo} id="logo" alt="logo"/> */}
-          <h2 id="result" className="result">Set your OpenAi key</h2>
-          <div id="openai">
-            <div>You need an OpenAI key to use {"name"}, it is stored locally and never sent anywhere else but to OpenAI.</div>
-            <div>Get yours <a href="https://platform.openai.com/account/api-keys">here</a></div>
-          </div>
-            <div id="input" className="input-box">
-                <input id="name" className="input" onChange={updateKey} autoComplete="off" name="input" type="text"/>
-                <div id="error">
-                  {
-                    error !== '' && <span>{error}</span>
-                  }
-                </div>
-            </div>
-            <button className="btn" onClick={saveKey}>Continue</button>
-        </div>
-    )
+    </div>
+  )
 }
 
 export default App
