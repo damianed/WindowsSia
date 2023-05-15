@@ -18,8 +18,16 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "gptdesktop",
-		Width:  1024,
-		Height: 768,
+		Width:  600,
+		Height: 800,
+    //DisableResize: true,
+    MinWidth: 600,
+    MinHeight: 800,
+    MaxHeight: 600,
+    MaxWidth: 800,
+    AlwaysOnTop: true,
+    Frameless: true,
+    WindowStartState: options.Normal,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

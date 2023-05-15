@@ -18,7 +18,7 @@ function App() {
 
 
   return (
-    <div id="App" className="h-screen">
+    <div id="App">
       { !hasApiKey
         ? <ApiKeyForm setHasApiKey={setHasApiKey}/>
         : <AddAction />

@@ -1,19 +1,23 @@
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import AddShortcutField from "./AddShortCutField"
+import ViewBase from "./ViewBase"
 
 // TODO: add option to insert text maybe, maybe should always do that if text is selected
 export default function AddAction() {
   const [addingShortcut, setAddingShortcut] = useState(false)
   const [shortcutKeys, setShortcutKeys] = useState(false)
 
-  function onAddShortcut() {
-    console.log(!addingShortcut)
-    setAddingShortcut(!addingShortcut)
+  useEffect(() => {
+    console.log('shortgang', shortcutKeys)
+  }, [shortcutKeys])
+
+  function onSave() {
+
   }
 
   return (
-    <div>
-      <div className="flex flex-col py-12 mx-20 space-y-12">
+    <ViewBase title="Add new action" buttons={[{'text': 'Save', onClick: onSave}]}>
+      <div className="flex flex-col py-4 mx-10 space-y-4">
         <div className="flex flex-col w-full space-y-3">
           <div className="flex">Name of action</div>
           <input type="text" className="flex"></input>
@@ -24,10 +28,10 @@ export default function AddAction() {
         </div>
         <div className="flex flex-col w-full space-y-3">
           <div className="flex">Click to add shortcut</div>
-          <AddShortcutField onClick={onAddShortcut} active={addingShortcut} setShortCut={setShortcutKeys} />
+          <AddShortcutField setShortCut={setShortcutKeys} />
         </div>
       </div>
-    </div>
+    </ViewBase>
   )
 }
 

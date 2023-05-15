@@ -1,40 +1,56 @@
 import {useCallback, useEffect, useState} from "react";
 
-export default function AddShortcutField({ active, setShortCut, onClick=(() => {})}) {
+export default function AddShortcutField({ setShortCut }) {
   const [keysPressed, setKeysPressed] = useState([])
-  const [addingGroup, setAddingGroup] = useState([])
+  const [recording, setRecording] = useState(false)
 
   const handleKeyPress = useCallback((event) => {
-    let currKeys = keysPressed
-    if (!addingGroup) {
-      currKeys = []
-      setKeysPressed([])
-      setAddingGroup(true)
+    let key = event.key
+    if (key === 'Meta') {
+      key = 'Alt'
     }
 
-    console.log(`Keys pressed: ${currKeys.length}`)
-    setKeysPressed([...keysPressed, event.key])
-  }, [])
+    if (key === ' ') {
+      key = 'Space'
+    }
 
-  const handleKeyUp = useCallback((event) => {
-    setAddingGroup(false)
-    setShortCut(keysPressed)
-  }, [])
+    if (key === 'Shift') {
+      key = '⇧'
+    }
 
-  function addEventListeners()
-  {
+    if (key === 'Control') {
+      key = 'CTRL'
+    }
+
+    if (key == 'Super') {
+      key = '❖'
+    }
+
+    key = key.toUpperCase()
+
+    if (keysPressed.includes(key)) {
+      return
+    }
+
+    const currKeys = [...keysPressed, key]
+    setKeysPressed(currKeys)
+
+    if (! ['Shift', 'Alt', 'Control', 'Super', 'Meta'].includes(event.key)) {
+      setRecording(false)
+      setShortCut(currKeys)
+    }
+  }, [keysPressed])
+
+  function addEventListeners() {
     document.addEventListener('keydown', handleKeyPress)
-    document.addEventListener('keyup', handleKeyUp)
   }
 
-  function removeEventListener()
-  {
+  function removeEventListener() {
     document.removeEventListener('keydown', handleKeyPress)
-    document.removeEventListener('keyup', handleKeyUp)
   }
 
   useEffect(() => {
-    if (active) {
+    if (recording) {
       addEventListeners()
     }
 
@@ -44,18 +60,27 @@ export default function AddShortcutField({ active, setShortCut, onClick=(() => {
   }, [handleKeyPress])
 
   useEffect(() => {
-    if (active) {
-      console.log('adding event listener')
+    if (recording) {
+      setKeysPressed([])
       addEventListeners()
     } else {
-      setShortCut(keysPressed)
       removeEventListener()
     }
-  }, [active])
+  }, [recording])
 
   return (
-    <div onClick={onClick} className="w-16 h-12 bg-white">
-      {keysPressed.map((key) => key)}
+    <div onClick={() => setRecording(true)} className="w-1/2 py-2 text-center text-gray-400 bg-white">
+      {keysPressed.map((key, index) => {
+        let element = key
+        if (index < keysPressed.length - 1)
+          element = `${element} +`
+
+        if (index > 0)
+          element = ` ${element}`
+
+        return <span key={index} className="font-bold text-gray-500">{element}</span>
+      })}
+      { recording ? <p>Recording...</p> : <p>Click to change shortcut</p> }
     </div>
   )
 }
