@@ -12,11 +12,13 @@ import (
 
 type Config struct {
   ApiKey string `json:"apiKey"`
+  Actions []Action `json:"actions"`
 }
 
 func DefaultConfig() Config {
   return Config{
     ApiKey: "",
+    Actions: []Action{},
   }
 }
 

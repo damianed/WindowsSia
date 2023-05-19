@@ -18,7 +18,7 @@ function UserIcon({ color = "#ffffff" }) {
   )
 }
 
-function Chat() {
+function Chat({ action = null }) {
   const [message, setMessage] = useState("")
   const updateMessage = (e) => setMessage(e.target.value)
   const [chatHistory, setChatHistory] = useState([])
@@ -29,16 +29,17 @@ function Chat() {
     setLoading(true)
     setMessage("")
     setChatHistory(messages)
+    const initialPrompt = action === null ? {} : {Role: 'System', 'Content': action.propmpt}
     SendMessage(messages).then((res) => {
-      setChatHistory([...messages, {'Role': 'assistant', 'Content': res}])
+      setChatHistory([...[initialPrompt], ...messages, {'Role': 'assistant', 'Content': res}])
       setLoading(false)
     })
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="h-full px-32 text-left">
-        <div className="w-full h-full px-5 py-3 mb-50 bg-slate-900">
+      <div className="h-full px-16 text-left">
+        <div className="w-full px-5 py-3 overflow-y-scroll h-4/6 mb-50 bg-slate-900">
           {
             chatHistory.map((item, index) => {
               return (
@@ -57,7 +58,7 @@ function Chat() {
           }
         </div>
       </div>
-      <div className="fixed bottom-0 flex flex-row w-full px-32 py-3">
+      <div className="fixed flex flex-row w-full px-10 py-3 bottom-12 h-1/6 max-h-24">
         <div className="flex w-full px-4 py-3 text-center text-white bg-slate-900">
           <textarea onChange={updateMessage} className="w-full p-2 bg-transparent border rounded-lg border-slate-400"></textarea>
           <button onClick={onSend} disabled={loading} className={`h-8 my-auto ml-3 font-bold bg-transparent ${loading ? 'text-slate-500' : 'text-slate-400'}`}>Send</button>

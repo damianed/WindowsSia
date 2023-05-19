@@ -26,7 +26,7 @@ export default function AddShortcutField({ setShortCut }) {
       key = '❖'
     }
 
-    key = key.toUpperCase()
+    key = key.toLowerCase()
 
     if (keysPressed.includes(key)) {
       return
@@ -69,7 +69,7 @@ export default function AddShortcutField({ setShortCut }) {
   }, [recording])
 
   return (
-    <div onClick={() => setRecording(true)} className="w-1/2 py-2 text-center text-gray-400 bg-white">
+    <div onClick={() => setRecording(true)} className="w-1/2 py-2 text-center bg-gray-700">
       {keysPressed.map((key, index) => {
         let element = key
         if (index < keysPressed.length - 1)
@@ -78,7 +78,7 @@ export default function AddShortcutField({ setShortCut }) {
         if (index > 0)
           element = ` ${element}`
 
-        return <span key={index} className="font-bold text-gray-500">{element}</span>
+        return <span key={index} className="font-bold">{element}</span>
       })}
       { recording ? <p>Recording...</p> : <p>Click to change shortcut</p> }
     </div>

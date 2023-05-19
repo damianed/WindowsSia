@@ -3,8 +3,7 @@ import {useEffect, useState} from 'react';
 import './App.css';
 import {HasSavedKey} from "../wailsjs/go/main/App";
 import ApiKeyForm from './components/ApiKeyForm';
-import Chat from './components/Chat';
-import AddAction from './components/AddAction';
+import Main from './components/Main';
 
 function App() {
   const [hasApiKey, setHasApiKey] = useState(false);
@@ -18,10 +17,11 @@ function App() {
 
 
   return (
-    <div id="App">
-      { !hasApiKey
+    <div id="App" className="h-screen overflow-y-hidden">
+      {
+        !hasApiKey
         ? <ApiKeyForm setHasApiKey={setHasApiKey}/>
-        : <AddAction />
+        : <Main />
       }
     </div>
   )

@@ -129,3 +129,20 @@ func (a *App) chatWithHistory(message string) (string) {
   fmt.Println(messages)
   return ""
 }
+
+func (a *App) SaveAction(action Action) {
+  err := action.store(*a.configStore)
+  if err != nil {
+    fmt.Println("Error", err.Error())
+    runtime.EventsEmit(a.ctx, "Error", "Error saving action" + err.Error())
+  }
+}
+
+func (a *App) GetActions() []Action {
+  cfg, err := a.configStore.Config()
+  if err != nil {
+    runtime.EventsEmit(a.ctx, "Error", "Error getting actions" + err.Error())
+  }
+
+  return cfg.Actions
+}
