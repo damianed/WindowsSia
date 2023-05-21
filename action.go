@@ -1,10 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+)
 
 type Action struct {
+  Id int
   Name string
   Prompt string
+  PromptResponse string
   Shortcut []string
 }
 
@@ -16,7 +21,9 @@ func (a *Action) store(configStore ConfigStore) error {
     return err
   }
 
-  cfg.Actions = append(cfg.Actions, *a)
+  index := len(cfg.Actions)
+  a.Id = index
+  cfg.Actions[index] = *a
   fmt.Println(cfg)
   err = configStore.SaveConfig(cfg)
   return err

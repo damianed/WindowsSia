@@ -18,6 +18,6 @@ export function SaveOpenAIKey(arg1) {
   return window['go']['main']['App']['SaveOpenAIKey'](arg1);
 }
 
-export function SendMessage(arg1) {
-  return window['go']['main']['App']['SendMessage'](arg1);
+export function SendMessage(arg1, arg2) {
+  return window['go']['main']['App']['SendMessage'](arg1, arg2);
 }

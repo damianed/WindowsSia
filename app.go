@@ -42,7 +42,13 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) HasSavedKey() bool {
-  cfg, _ := a.configStore.Config()
+  cfg, err := a.configStore.Config()
+
+  if err != nil {
+    fmt.Printf("Error reading config file %s\n", err)
+    os.Exit(1)
+  }
+
   if cfg.ApiKey == "" {
     return false
   }
@@ -95,11 +101,28 @@ func (a *App) SaveOpenAIKey(key string) string {
   return ""
 }
 
-func (a *App) SendMessage(messages []openai.ChatCompletionMessage) string {
-  fmt.Println(messages)
+func (a *App) SendMessage(messages []openai.ChatCompletionMessage, actionId int) string {
   cfg, _ := a.configStore.Config()
 
   client := openai.NewClient(cfg.ApiKey)
+
+  if (actionId != -1) {
+    action := cfg.Actions[actionId]
+    messages = append([]openai.ChatCompletionMessage{
+      {
+        Role: openai.ChatMessageRoleUser,
+        Content: action.Prompt,
+      },
+      {
+        Role: openai.ChatMessageRoleAssistant,
+        Content: action.PromptResponse,
+      },
+    }, messages...)
+  }
+
+  fmt.Println("restarting")
+  fmt.Println(messages)
+
   resp, err := client.CreateChatCompletion(
     context.Background(),
     openai.ChatCompletionRequest{
@@ -131,18 +154,36 @@ func (a *App) chatWithHistory(message string) (string) {
 }
 
 func (a *App) SaveAction(action Action) {
+  go a.saveActionResponse(action)
   err := action.store(*a.configStore)
+
   if err != nil {
     fmt.Println("Error", err.Error())
     runtime.EventsEmit(a.ctx, "Error", "Error saving action" + err.Error())
   }
 }
 
-func (a *App) GetActions() []Action {
+func (a *App) GetActions() map[int]Action {
   cfg, err := a.configStore.Config()
   if err != nil {
     runtime.EventsEmit(a.ctx, "Error", "Error getting actions" + err.Error())
   }
 
   return cfg.Actions
+}
+
+func (a *App) saveActionResponse(action Action) {
+  messages := []openai.ChatCompletionMessage{{
+    Role: openai.ChatMessageRoleUser,
+    Content: action.Prompt,
+  }}
+
+  res := a.SendMessage(messages, -1)
+  action.PromptResponse = res
+  err := action.store(*a.configStore)
+
+  if err != nil {
+    fmt.Println("Error", err.Error())
+    runtime.EventsEmit(a.ctx, "Error", "Error saving action" + err.Error())
+  }
 }

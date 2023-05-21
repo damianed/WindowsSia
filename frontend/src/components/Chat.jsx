@@ -23,44 +23,63 @@ function Chat({ action = null }) {
   const updateMessage = (e) => setMessage(e.target.value)
   const [chatHistory, setChatHistory] = useState([])
   const [loading, setLoading] = useState(false)
+  const initialPrompt = action === null ? {} : {Role: 'user', 'Content': action.Prompt}
 
+  console.log(action)
   function onSend() {
-    let messages = [...chatHistory, {'Role': 'user', 'Content': message}]
+    let messageObj = {'Role': 'user', 'Content': message}
+    setChatHistory([...chatHistory, messageObj])
+    let messages = []
+
+    if (action == null) {
+      messages = [...chatHistory, messageObj]
+    } else {
+      messages = [messageObj]
+    }
+
     setLoading(true)
     setMessage("")
-    setChatHistory(messages)
-    const initialPrompt = action === null ? {} : {Role: 'System', 'Content': action.propmpt}
-    SendMessage(messages).then((res) => {
-      setChatHistory([...[initialPrompt], ...messages, {'Role': 'assistant', 'Content': res}])
+    SendMessage(messages, (action?.Id ?? -1 )).then((res) => {
+      setChatHistory((chatHistory) => [...chatHistory, {'Role': 'assistant', 'Content': res}])
       setLoading(false)
     })
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="h-full px-16 text-left">
+      <div className="h-full px-2 text-left">
         <div className="w-full px-5 py-3 overflow-y-scroll h-4/6 mb-50 bg-slate-900">
-          {
-            chatHistory.map((item, index) => {
-              return (
-                <div key={index} className="flex flex-row">
-                  {
-                    item.Role == 'user'
-                    ? <UserIcon />
-                    : <UserIcon color="#000000"/>
-                  }
-                  <div className={`mb-10 ml-5 ${item.Role === 'user' ? 'text-gray-300' : 'text-white'}`} key={index}>
-                    {item.Content}
-                  </div>
-               </div>
-              )
-            })
-          }
+          <>
+            {
+              initialPrompt &&
+              <div className="flex flex-row">
+                <div className="mb-10 ml-5 text-gray-400">
+                  {initialPrompt.Content}
+                </div>
+              </div>
+            }
+            {
+              chatHistory.map((item, index) => {
+                return (
+                  <div key={index} className="flex flex-row">
+                    {
+                      item.Role == 'user'
+                      ? <UserIcon />
+                      : <UserIcon color="#000000"/>
+                    }
+                    <div className={`mb-10 ml-5 ${item.Role === 'user' ? 'text-gray-300' : 'text-white'}`} key={index}>
+                      {item.Content}
+                    </div>
+                 </div>
+                )
+              })
+            }
+          </>
         </div>
       </div>
-      <div className="fixed flex flex-row w-full px-10 py-3 bottom-12 h-1/6 max-h-24">
+      <div className="fixed flex flex-row w-full px-2 py-3 bottom-12 h-1/6 max-h-24">
         <div className="flex w-full px-4 py-3 text-center text-white bg-slate-900">
-          <textarea onChange={updateMessage} className="w-full p-2 bg-transparent border rounded-lg border-slate-400"></textarea>
+          <textarea onChange={updateMessage} value={message} className="w-full p-2 bg-transparent border rounded-lg border-slate-400"></textarea>
           <button onClick={onSend} disabled={loading} className={`h-8 my-auto ml-3 font-bold bg-transparent ${loading ? 'text-slate-500' : 'text-slate-400'}`}>Send</button>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import {main} from '../models';
 import {openai} from '../models';
 
-export function GetActions():Promise<Array<main.Action>>;
+export function GetActions():Promise<{[key: number]: main.Action}>;
 
 export function HasSavedKey():Promise<boolean>;
 
@@ -11,4 +11,4 @@ export function SaveAction(arg1:main.Action):Promise<void>;
 
 export function SaveOpenAIKey(arg1:string):Promise<string>;
 
-export function SendMessage(arg1:Array<openai.ChatCompletionMessage>):Promise<string>;
+export function SendMessage(arg1:Array<openai.ChatCompletionMessage>,arg2:number):Promise<string>;

@@ -5,7 +5,6 @@ import Chat from "./Chat";
 import AddAction from "./AddAction";
 
 function ActionElement ({name, shortcut, onClick}) {
-  // TODO: fetch actions from backend
   return (
     <div className="flex justify-between px-3 py-2 mx-5 mb-4 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600" onClick={onClick}>
       <span>{name}</span>
@@ -20,19 +19,30 @@ function ActionElement ({name, shortcut, onClick}) {
 
 export default function Main() {
   const [actions, setActions] = useState([]);
+  const [currentActions, setCurrentActions] = useState([])
   const [actionSelected, setActionSelected] = useState(null)
   const [addingAction, setAddingAction] = useState(false)
   const [title, setTitle] = useState("Search Action")
+  const [search, setSearch] = useState('')
+  const updateSearch = (e)  => setSearch(e.target.value)
+  const askAQuestionAction = {Name: 'Ask a question', Shortcut: ['ctrl', 'f']}
 
   const fetchActions = () => {
     GetActions().then((actions) => {
-      setActions([...[{Name: 'Ask a question', Shortcut: ['ctrl', 'f']}], ...actions])
+      const allActions = [...[askAQuestionAction], ...Object.values(actions)]
+      setActions(allActions)
+      setCurrentActions(allActions)
     })
   }
 
   useEffect(() => {
     fetchActions()
   }, [])
+
+  useEffect(() => {
+    console.log(search)
+    setCurrentActions(actions.filter((action) => action.Name.toLowerCase().includes(search.toLowerCase())))
+  }, [search])
 
   useEffect(() => {
     console.log('actionSelected', actionSelected)
@@ -46,7 +56,7 @@ export default function Main() {
   }
 
   const backFromAddingAction = () => {
-     setAddingAction(false)
+    setAddingAction(false)
     fetchActions()
   }
 
@@ -65,9 +75,19 @@ export default function Main() {
     <ViewBase title={title} onBack={actionSelected ? backFromAction : null} buttons={[{text: 'Add new action', onClick: () => setAddingAction(true)}]}>
       {
         actionSelected
-        ? <Chat action={actionSelected} />
-        : actions.map((action, index) =>
-            <ActionElement key={index} name={action.Name} shortcut={action.Shortcut} onClick={() => onClick(action)} />
+        ? <Chat action={actionSelected === askAQuestionAction ? null : actionSelected} />
+        :
+        (
+          <>
+            <input type="text" className="flex p-1 mx-5 mb-4 bg-gray-700 rounded-lg" placeholder="Search action..." search={search} onChange={updateSearch}></input>
+            {currentActions.map((action, index) => {
+                if (index === 0) {
+                  return <ActionElement key={index} name={action.Name} shortcut={action.Shortcut} onClick={() => onClick(action)} />
+                }
+                return <ActionElement key={index} name={action.Name} shortcut={action.Shortcut} onClick={() => onClick(action)} />
+              }
+            )}
+          </>
         )
       }
     </ViewBase>

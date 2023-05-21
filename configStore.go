@@ -12,13 +12,13 @@ import (
 
 type Config struct {
   ApiKey string `json:"apiKey"`
-  Actions []Action `json:"actions"`
+  Actions map[int]Action `json:"actions"`
 }
 
 func DefaultConfig() Config {
   return Config{
     ApiKey: "",
-    Actions: []Action{},
+    Actions: map[int]Action{},
   }
 }
 
@@ -29,6 +29,7 @@ type ConfigStore struct {
 func NewConfigStore() (*ConfigStore, error) {
   //TODO: update path
   configFilePath, err := xdg.ConfigFile("gptdesktop/config.json")
+  fmt.Println(configFilePath)
   if err != nil {
     return nil, fmt.Errorf("could not resolve path for config file: %w", err)
   }
