@@ -6,12 +6,16 @@ export function GetActions() {
   return window['go']['main']['App']['GetActions']();
 }
 
+export function GetKeys() {
+  return window['go']['main']['App']['GetKeys']();
+}
+
 export function HasSavedKey() {
   return window['go']['main']['App']['HasSavedKey']();
 }
 
-export function SaveAction(arg1) {
-  return window['go']['main']['App']['SaveAction'](arg1);
+export function SaveAction(arg1, arg2) {
+  return window['go']['main']['App']['SaveAction'](arg1, arg2);
 }
 
 export function SaveOpenAIKey(arg1) {

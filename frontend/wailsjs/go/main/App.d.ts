@@ -3,11 +3,13 @@
 import {main} from '../models';
 import {openai} from '../models';
 
-export function GetActions():Promise<{[key: number]: main.Action}>;
+export function GetActions():Promise<{[key: number]: main.ActionResponse}>;
+
+export function GetKeys():Promise<Array<string>>;
 
 export function HasSavedKey():Promise<boolean>;
 
-export function SaveAction(arg1:main.Action):Promise<void>;
+export function SaveAction(arg1:main.Action,arg2:main.ShortcutRequest):Promise<void>;
 
 export function SaveOpenAIKey(arg1:string):Promise<string>;
 

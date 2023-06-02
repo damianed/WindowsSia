@@ -1,43 +1,60 @@
 import {useCallback, useEffect, useState} from "react";
+import {GetKeys} from "../../wailsjs/go/main/App";
 
-export default function AddShortcutField({ setShortCut }) {
-  const [keysPressed, setKeysPressed] = useState([])
+export default function AddShortcutField({ setShortCut, shortcutError = null }) {
+  const [keysPressed, setKeysPressed] = useState({mods: [], key: null})
+  const [keysDisplay, setKeysDisplay] = useState([])
   const [recording, setRecording] = useState(false)
+  const [validKeys, setValidKeys] = useState(null)
+
+  useEffect(() => {
+    GetKeys().then((keys) => {
+      setValidKeys(new Set(keys))
+    })
+  }, [])
 
   const handleKeyPress = useCallback((event) => {
     let key = event.key
+    console.log(key);
+    if (!validKeys || (validKeys && !validKeys.has(key))) { return } 
+
+    let display = event.key
     if (key === 'Meta') {
-      key = 'Alt'
+      display = 'Alt'
     }
 
     if (key === ' ') {
-      key = 'Space'
+      display = 'Space'
     }
 
     if (key === 'Shift') {
-      key = '⇧'
+      display = '⇧'
     }
 
     if (key === 'Control') {
-      key = 'CTRL'
+      display = 'CTRL'
     }
 
-    if (key == 'Super') {
-      key = '❖'
+    if (key === 'Super') {
+      display = '❖'
     }
 
-    key = key.toLowerCase()
+    display = display.toLowerCase()
 
-    if (keysPressed.includes(key)) {
+    if (keysDisplay.includes(display)) {
       return
     }
 
-    const currKeys = [...keysPressed, key]
-    setKeysPressed(currKeys)
-
+    setKeysDisplay((keysDisplay) => [...keysDisplay, display])
     if (! ['Shift', 'Alt', 'Control', 'Super', 'Meta'].includes(event.key)) {
       setRecording(false)
-      setShortCut(currKeys)
+      setKeysPressed((keysPressed) => {
+        const currShortcut = {mods: keysPressed.mods, key: key}
+        setKeysPressed(currShortcut)
+        setShortCut(currShortcut)
+      })
+    } else {
+      setKeysPressed({mods: [...keysPressed.mods, key], key: keysPressed.key})
     }
   }, [keysPressed])
 
@@ -61,7 +78,8 @@ export default function AddShortcutField({ setShortCut }) {
 
   useEffect(() => {
     if (recording) {
-      setKeysPressed([])
+      setKeysDisplay([])
+      setKeysPressed({mods: [], key: null})
       addEventListeners()
     } else {
       removeEventListener()
@@ -70,9 +88,10 @@ export default function AddShortcutField({ setShortCut }) {
 
   return (
     <div onClick={() => setRecording(true)} className="w-1/2 py-2 text-center bg-gray-700">
-      {keysPressed.map((key, index) => {
-        let element = key
-        if (index < keysPressed.length - 1)
+      {shortcutError && <p className="text-red-500">{shortcutError}</p>}
+      {keysDisplay.map((key, index) => {
+        let element = key 
+        if (index < keysDisplay.length - 1)
           element = `${element} +`
 
         if (index > 0)

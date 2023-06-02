@@ -32,7 +32,7 @@ function ApiKeyForm({setHasApiKey}) {
       <h2 id="result" className="result">Set your OpenAi key</h2>
       <div id="openai">
         <div>You need an OpenAI key to use {"name"}, it is stored locally and never sent anywhere else but to OpenAI.</div>
-        <div>Get yours <a href="https://platform.openai.com/account/api-keys">here</a></div>
+        <div>Get yours <a onClick={() => BrowserOpenUrl("https://platform.openai.com/account/api-keys")}>here</a></div>
       </div>
       <div id="input" className="input-box">
           <input id="name" className="input" onChange={updateKey} autoComplete="off" name="input" type="text"/>

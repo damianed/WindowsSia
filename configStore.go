@@ -11,74 +11,74 @@ import (
 )
 
 type Config struct {
-  ApiKey string `json:"apiKey"`
-  Actions map[int]Action `json:"actions"`
+	ApiKey  string         `json:"apiKey"`
+	Actions map[int]Action `json:"actions"`
 }
 
 func DefaultConfig() Config {
-  return Config{
-    ApiKey: "",
-    Actions: map[int]Action{},
-  }
+	return Config{
+		ApiKey:  "",
+		Actions: map[int]Action{},
+	}
 }
 
 type ConfigStore struct {
-  configPath string
+	configPath string
 }
 
 func NewConfigStore() (*ConfigStore, error) {
-  //TODO: update path
-  configFilePath, err := xdg.ConfigFile("gptdesktop/config.json")
-  fmt.Println(configFilePath)
-  if err != nil {
-    return nil, fmt.Errorf("could not resolve path for config file: %w", err)
-  }
+	//TODO: update path
+	configFilePath, err := xdg.ConfigFile("gptdesktop/config.json")
+	fmt.Println(configFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("could not resolve path for config file: %w", err)
+	}
 
-  return &ConfigStore{
-    configPath: configFilePath,
-  }, nil
+	return &ConfigStore{
+		configPath: configFilePath,
+	}, nil
 }
 
 func (s *ConfigStore) Config() (Config, error) {
-  _, err := os.Stat(s.configPath)
-  if os.IsNotExist(err) {
-    return DefaultConfig(), nil
-  }
+	_, err := os.Stat(s.configPath)
+	if os.IsNotExist(err) {
+		return DefaultConfig(), nil
+	}
 
-  dir, fileName := filepath.Split(s.configPath)
-  if len(dir) == 0 {
-    dir = "."
-  }
+	dir, fileName := filepath.Split(s.configPath)
+	if len(dir) == 0 {
+		dir = "."
+	}
 
-  buf, err := fs.ReadFile(os.DirFS(dir), fileName)
-  if err != nil {
-    return Config{}, fmt.Errorf("could not read the configuration file %w", err)
-  }
+	buf, err := fs.ReadFile(os.DirFS(dir), fileName)
+	if err != nil {
+		return Config{}, fmt.Errorf("could not read the configuration file %w", err)
+	}
 
-  if len(buf) == 0 {
-    return DefaultConfig(), nil
-  }
+	if len(buf) == 0 {
+		return DefaultConfig(), nil
+	}
 
-  cfg := Config{}
-  if err := json.Unmarshal(buf, &cfg); err != nil {
-    //TODO: Update error messages
-    return Config{}, fmt.Errorf("configuration file does not have a valid format: %w", err)
-  }
+	cfg := Config{}
+	if err := json.Unmarshal(buf, &cfg); err != nil {
+		//TODO: Update error messages
+		return Config{}, fmt.Errorf("configuration file does not have a valid format: %w", err)
+	}
 
-  return cfg, nil
+	return cfg, nil
 }
 
 func (s *ConfigStore) SaveConfig(cfg Config) error {
-  bytes, err := json.Marshal(cfg)
-  if err != nil {
-    return fmt.Errorf("could not marshal config to JSON: %w", err)
-  }
+	bytes, err := json.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("could not marshal config to JSON: %w", err)
+	}
 
-  err = os.WriteFile(s.configPath, bytes, 0644)
+	err = os.WriteFile(s.configPath, bytes, 0644)
 
-  if err != nil {
-    return fmt.Errorf("could not write the configuration file: %w", err)
-  }
+	if err != nil {
+		return fmt.Errorf("could not write the configuration file: %w", err)
+	}
 
-  return nil
+	return nil
 }

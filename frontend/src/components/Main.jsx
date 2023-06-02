@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import ViewBase from "./ViewBase";
-import {GetActions} from "../../wailsjs/go/main/App"
+import {GetActions} from "../../wailsjs/go/main/App";
 import Chat from "./Chat";
 import AddAction from "./AddAction";
 
@@ -9,7 +9,7 @@ function ActionElement ({name, shortcut, onClick}) {
     <div className="flex justify-between px-3 py-2 mx-5 mb-4 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600" onClick={onClick}>
       <span>{name}</span>
       <div className="space-x-1">
-        {shortcut.map((key, index) => {
+        {[...shortcut.mods, ...shortcut.key].map((key, index) => {
           return <span key={index} className="px-2 py-1 bg-gray-900">{key.toLowerCase()}</span>
         })}
       </div>
@@ -25,27 +25,40 @@ export default function Main() {
   const [title, setTitle] = useState("Search Action")
   const [search, setSearch] = useState('')
   const updateSearch = (e)  => setSearch(e.target.value)
-  const askAQuestionAction = {Name: 'Ask a question', Shortcut: ['ctrl', 'f']}
 
   const fetchActions = () => {
     GetActions().then((actions) => {
-      const allActions = [...[askAQuestionAction], ...Object.values(actions)]
+      if (actions === null) {
+        actions = {}
+      }
+
+      const allActions = Object.values(actions).sort((a, b) => b.Id - a.Id)
+      console.log('actions', allActions)
       setActions(allActions)
       setCurrentActions(allActions)
     })
   }
 
   useEffect(() => {
+    window.runtime.EventsOn('actionShortcut', (action) => {
+      console.log('event', action)
+      setActionSelected(action)
+    })
+
     fetchActions()
   }, [])
 
   useEffect(() => {
-    console.log(search)
     setCurrentActions(actions.filter((action) => action.Name.toLowerCase().includes(search.toLowerCase())))
   }, [search])
 
   useEffect(() => {
-    console.log('actionSelected', actionSelected)
+    if (actionSelected === null) {
+      setTitle("Search Action") 
+      return
+    }
+
+    setTitle(actionSelected.Name)
   }, [actionSelected])
 
   const backFromAction = () => {
@@ -67,7 +80,7 @@ export default function Main() {
 
   if (addingAction) {
     return (
-      <AddAction onBack={backFromAddingAction} />
+      <AddAction onBack={backFromAddingAction} usedShortcuts={actions.map((action) => action.Shortcut)} />
     )
   }
 
@@ -75,7 +88,7 @@ export default function Main() {
     <ViewBase title={title} onBack={actionSelected ? backFromAction : null} buttons={[{text: 'Add new action', onClick: () => setAddingAction(true)}]}>
       {
         actionSelected
-        ? <Chat action={actionSelected === askAQuestionAction ? null : actionSelected} />
+        ? <Chat action={actionSelected.id === -1 ? null : actionSelected} />
         :
         (
           <>
